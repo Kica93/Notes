@@ -1,0 +1,86 @@
+Android 6.0+ 动态权限申请
+
+Android M 或以上的设备，在使用涉及隐私的安全权限时，需要动态申请。    
+
+
+最简单直接的方法：使用Google提供的简化动态权限申请的库。使用EasyPermissions工具类。
+使用方法如下：
+
+引用该库：
+ implementation 'pub.devrel:easypermissions:1.2.0'                                                          
+
+ implements EasyPermissions.PermissionCallbacks,EasyPermissions.RationaleCallbacks {
+   ……
+ }//让activity继承接口，并重写对应的回调函数
+
+ //需要动态申请的权限
+ private String[] mPermissions = {Manifest.permission.READ_SMS};
+ //请求码, 用于回调的时候判断是哪次申请
+ public static final int CODE = 0x001;
+
+ //检查权限，防止重复获取
+ if (EasyPermissions.hasPermissions(SmsInFragmentActivity.this, mPermissions)) {
+
+    //有权限
+    //do something
+
+ } else {
+
+ /*
+ 无权限
+ 发起动态申请
+ 调用系统提示dialog
+ “是否允许‘SmsOnFragmentAtyDemo’发送和查看短信？”
+ “包含读取短信/彩信”
+ “禁止后不再提示”
+ */
+ EasyPermissions.requestPermissions(SmsInFragmentActivity.this,"自定义提示！请求用户允许使用权限！如需查询短信，请允许该权限！",CODE,mPermissions);
+
+ }
+
+ //权限申请成功的回调
+ @Override
+ public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+    Log.i(getClass().getSimpleName(),"onPermissionsGranted()_权限申请成功的回调");
+
+    //用户允许了权限。执行后续逻辑即可。
+    //do something...
+ }
+
+ //权限获取失败的回调（即用户点击了禁止按钮）
+ @Override
+ public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+    Log.i(getClass().getSimpleName(),"onPermissionsDenied()_权限获取失败的回调（即用户点击了禁止按钮）");
+
+ }
+
+ //权限被拒绝后的提示对话框，点击确认的回调
+ @Override
+ public void onRationaleAccepted(int requestCode) {
+    Log.i(getClass().getSimpleName(),"onRationaleAccepted()_权限被拒绝后的显示提示对话框，点击确认的回调");
+
+    //即上一次拒绝后，自定义提示用户请求权限（"如需查询短信，请允许该权限！"）
+    //以上情况下，用户点击了确认。后续默认调用系统申请权限的dialog
+ }
+
+ //权限被拒绝后的显示提示对话框，点击取消的回调
+ @Override
+ public void onRationaleDenied(int requestCode) {
+    Log.i(getClass().getSimpleName(),"onRationaleDenied()_权限被拒绝后的显示提示对话框，点击取消的回调");
+
+ }
+
+ //用户处理权限请求后回调（禁止，允许）即在系统请求权限dialog上点击了 禁止or允许
+ //如果用户勾选了 禁止后不再提示，每当申请权限时将直接执行此回调。
+ @Override
+ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    Log.i(getClass().getSimpleName(),"onRequestPermissionsResult()_用户处理系统提示的权限请求后回调（禁止，允许）即在系统请求权限dialog上点击了             禁止or允许");
+
+ }
+
+
+
+
+
+
